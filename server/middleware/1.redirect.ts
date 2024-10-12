@@ -5,7 +5,7 @@ import { parsePath, withQuery } from 'ufo'
 export default eventHandler(async (event) => {
   const { pathname: slug } = parsePath(event.path.replace(/^\/|\/$/g, '')) // remove leading and trailing slashes
   const { slugRegex, reserveSlug } = useAppConfig(event)
-  const { homeURL, linkCacheTtl, redirectWithQuery, caseSensitive } = useRuntimeConfig(event)
+  const { homeURL, linkCacheTtl, redirectWithQuery, caseSensitive, notFoundURL } = useRuntimeConfig(event)
   const { cloudflare } = event.context
 
   if (event.path === '/' && homeURL)
@@ -38,6 +38,9 @@ export default eventHandler(async (event) => {
       }
       const target = redirectWithQuery ? withQuery(link.url, getQuery(event)) : link.url
       return sendRedirect(event, target, +useRuntimeConfig(event).redirectStatusCode)
+    }
+    if (notFoundURL) {
+      return sendRedirect(event, notFoundURL, +useRuntimeConfig(event).redirectStatusCode)
     }
   }
 })
